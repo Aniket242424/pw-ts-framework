@@ -23,6 +23,14 @@ export class LoginPage extends BasePage {  // ✅ Inherits page from BasePage
   }
 
   async login(email?: string, password?: string) {
+
+// Dismiss cookie consent FIRST
+  const consentBtn = this.page.locator('#usercentrics-root button[mode="primary"]');
+  if (await consentBtn.count() > 0) {
+    await consentBtn.first().click();
+    await this.page.waitForTimeout(1000);  // Settle
+  }
+
     email = email || process.env.EMAIL!;
     const decryptedPass = password || CryptoHelper.decrypt(process.env.ENCRYPTED_PASSWORD!);
     

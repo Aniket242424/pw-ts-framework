@@ -47,19 +47,15 @@ export default defineConfig({
   
   /* Projects - only Chromium for dev (uncomment others for full matrix) */
   projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+  {
+    name: 'chromium',
+    use: { 
+      ...devices['Desktop Chrome'],
+      headless: !process.env.CI,  // Headed locally
     },
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit', 
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-  ],
+  },
+  // Add later: firefox, webkit
+],
   
   /* WebServer (uncomment if you have local app) */
   // webServer: {
