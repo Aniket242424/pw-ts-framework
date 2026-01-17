@@ -1,4 +1,4 @@
-name: Playwright Tests custom
+name: Playwright Tests Custom
 
 on:
   push:
@@ -28,9 +28,7 @@ jobs:
       
     - name: Run Playwright tests
       run: npx playwright test --project=chromium
-      env:
-        CI: true
-        
+      
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4

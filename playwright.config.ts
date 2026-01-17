@@ -5,62 +5,50 @@ import path from 'path';
 // Load .env automatically
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-/**
- * See https://playwright.dev/docs/test-configuration
- */
 export default defineConfig({
   testDir: './tests',
   
-  /* Maximum time one test can run for (in ms) */
+  /* Maximum time one test can run for */
   timeout: 30000,
   
-  /* Run tests in files in parallel */
+  /* Run tests in parallel */
   fullyParallel: true,
   
-  /* Fail build on CI if test.only left in code */
+  /* Fail on CI if test.only used */
   forbidOnly: !!process.env.CI,
   
-  /* Retry on CI only */
+  /* Retries */
   retries: process.env.CI ? 2 : 0,
   
-  /* Opt out of parallel on CI */
+  /* Workers */
   workers: process.env.CI ? 1 : undefined,
   
-  /* Reporter: HTML + List */
+  /* Reporters */
   reporter: [
-    ['html', { open: 'always' }],  // Open manually with `npx playwright show-report`
+    ['html', { open: 'always' }],
     ['list'],
-    // ['allure-playwright'],  // Uncomment after npm i allure-playwright
   ],
   
-  /* Global settings for ALL projects */
+  /* Shared settings */
   use: {
-  baseURL: process.env.BASE_URL || 'https://admin.dev.au.membr.com',
-  screenshot: 'on',
-  video: 'on',
-  trace: 'on',
-  actionTimeout: 10000,
-},
-
-  /* Output folders */
-  outputDir: 'playwright-report/',
-  
-  /* Projects - only Chromium for dev (uncomment others for full matrix) */
-  projects: [
-  {
-    name: 'chromium',
-    use: { 
-      ...devices['Desktop Chrome'],
-      headless: !process.env.CI,  // Headed locally
-    },
+    baseURL: process.env.BASE_URL || 'https://admin.dev.au.membr.com',
+    screenshot: 'on',
+    video: 'on',
+    trace: 'on',
+    actionTimeout: 10000,
   },
-  // Add later: firefox, webkit
-],
-  
-  /* WebServer (uncomment if you have local app) */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+
+  /* Output */
+  outputDir: 'playwright-report/',
+
+  /* Projects */
+  projects: [
+    {
+      name: 'chromium',
+      use: { 
+        ...devices['Desktop Chrome'],
+        headless: true,  // ✅ HEADLESS EVERYWHERE
+      },
+    },
+  ],
 });
