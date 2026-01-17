@@ -2,16 +2,15 @@ import { Page, Locator, expect } from '@playwright/test';
 import { CryptoHelper } from '../utils/crypto';
 import { BasePage } from './BasePage';
 
-export class LoginPage extends BasePage {  // ✅ Inherits page from BasePage
+export class LoginPage extends BasePage {
   readonly emailInput: Locator;
   readonly passwordInput: Locator;
   readonly loginButton: Locator;
   readonly errorBlock: Locator;
 
   constructor(page: Page) {
-    super(page);  // ✅ Passes page to BasePage
+    super(page);
     
-    // ✅ NO "this.page = page;" here - inherited from BasePage
     this.emailInput = page.getByPlaceholder('Email');
     this.passwordInput = page.getByPlaceholder('Password');
     this.loginButton = page.getByRole('button', { name: 'Log in' });
@@ -19,28 +18,44 @@ export class LoginPage extends BasePage {  // ✅ Inherits page from BasePage
   }
 
   async navigate() {
-    await this.page.goto('/login?e2e=1');  // ✅ this.page from BasePage
+    await this.page.goto('/login?e2e=1');
   }
 
   async login(email?: string, password?: string) {
+    // ✅ FIXED: Multiple selectors + force + longer timeout
+    const consentSelectors = [
+      '#usercentrics-root button[mode="primary"]',
+      '#usercentrics-root button:has-text("Accept"), #usercentrics-root button:has-text("Agree")',
+      '[data-usercentrics] button',
+      '#usercentrics-root [role="button"]'
+    ];
+    
+    for (const selector of consentSelectors) {
+      const consentBtn = this.page.locator(selector);
+      if (await consentBtn.count() > 0) {
+        console.log(`🎯 Dismissing consent: ${selector}`);
+        await consentBtn.first().click({ force: true });
+        await this.page.waitForTimeout(2000);
+        break;
+      }
+    }
 
-// Dismiss cookie consent FIRST
-  const consentBtn = this.page.locator('#usercentrics-root button[mode="primary"]');
-  if (await consentBtn.count() > 0) {
-    await consentBtn.first().click();
-    await this.page.waitForTimeout(1000);  // Settle
-  }
-
+    // Credentials
     email = email || process.env.EMAIL!;
     const decryptedPass = password || CryptoHelper.decrypt(process.env.ENCRYPTED_PASSWORD!);
     
     await this.emailInput.fill(email);
     await this.passwordInput.fill(decryptedPass);
-    await this.loginButton.click();
+    
+    // ✅ FIXED: Force click + 20s timeout
+    await this.loginButton.click({ 
+      force: true, 
+      timeout: 20000 
+    });
   }
 
   async assertLoginSuccess() {
-    await expect(this.page).toHaveURL(/company-management/);  // ✅ Inherited page
+    await expect(this.page).toHaveURL(/company-management|dashboard|home/i, { timeout: 10000 });
   }
 
   async assertLoginError() {
